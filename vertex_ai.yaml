@@ -1,0 +1,28 @@
+apiVersion: aiplatform.googleapis.com/v1
+kind: Model
+metadata:
+  name: cardreamer-model
+spec:
+  description: "CarDreamer model for autonomous driving simulation"
+  artifactUri: "gs://[YOUR_BUCKET]/models/cardreamer"
+  containerSpec:
+    imageUri: "us-docker.pkg.dev/[YOUR_PROJECT]/car-dream-repository/cardreamer-service:latest"
+    ports:
+    - containerPort: 8080
+
+---
+apiVersion: aiplatform.googleapis.com/v1
+kind: Endpoint
+metadata:
+  name: cardreamer-endpoint
+spec:
+  description: "Endpoint for serving the CarDreamer model"
+
+---
+apiVersion: aiplatform.googleapis.com/v1
+kind: Prediction
+metadata:
+  name: cardreamer-prediction
+spec:
+  endpoint: cardreamer-endpoint
+  model: cardreamer-model

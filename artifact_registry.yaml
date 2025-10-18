@@ -1,0 +1,7 @@
+apiVersion: artifactregistry.googleapis.com/v1beta1
+kind: Repository
+metadata:
+  name: car-dream-repository
+spec:
+  description: Repository for storing Docker images for the CarDream project
+  format: DOCKER

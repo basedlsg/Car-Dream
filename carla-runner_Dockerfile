@@ -1,0 +1,41 @@
+FROM mirror.gcr.io/library/ubuntu:20.04
+
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive
+ENV CARLA_VERSION=0.9.13
+
+# Harden apt: retries, timeouts, and mirror tweak
+RUN echo 'Acquire::Retries "5";' > /etc/apt/apt.conf.d/80-retries && \
+    echo 'Acquire::http::Timeout "30";' > /etc/apt/apt.conf.d/80-timeout && \
+    sed -i 's|http://ports.ubuntu.com|http://archive.ubuntu.com|g' /etc/apt/sources.list
+
+# Install dependencies with retry
+RUN apt-get update --security=false && \
+    apt-get install -y --no-install-recommends --security=false \
+    python3-pip \
+    wget \
+    unzip \
+    libgl1-mesa-dev \
+    libglu1-mesa \
+    xvfb \
+    xorg || (sleep 5 && apt-get update && apt-get install -y --no-install-recommends \
+    python3-pip wget unzip libgl1-mesa-dev libglu1-mesa xvfb xorg)
+
+# Install Python dependencies
+RUN pip3 install --upgrade pip
+RUN pip3 install pygame
+
+# Download and install CARLA
+RUN wget https://carla-releases.s3.eu-west-3.amazonaws.com/Linux/CARLA_${CARLA_VERSION}.tar.gz && \
+    tar -xzf CARLA_${CARLA_VERSION}.tar.gz && \
+    mv CARLA_${CARLA_VERSION} /opt/carla
+
+# Set CARLA environment variables
+ENV CARLA_ROOT=/opt/carla
+ENV PYTHONPATH=$CARLA_ROOT/PythonAPI/carla:$CARLA_ROOT/PythonAPI/carla/dist/carla-0.9.13-py3.7-linux-x86_64.egg
+
+# Expose CARLA port
+EXPOSE 2000
+
+# Run CARLA
+CMD xvfb-run --auto-servernum /opt/carla/CarlaUE4.sh -opengl

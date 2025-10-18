@@ -1,0 +1,31 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: orchestrator
+spec:
+  template:
+    spec:
+      containers:
+        - image: us-docker.pkg.dev/[YOUR_PROJECT]/car-dream-repository/orchestrator:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /app/service_account.json
+            - name: GEMINI_API_KEY
+              value: [YOUR_GEMINI_API_KEY]
+---
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: reporter
+spec:
+  template:
+    spec:
+      containers:
+        - image: us-docker.pkg.dev/[YOUR_PROJECT]/car-dream-repository/reporter:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /app/service_account.json

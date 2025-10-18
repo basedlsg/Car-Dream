@@ -1,0 +1,162 @@
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Downloads and personal files
+Downloads/
+Music/
+Movies/
+Pictures/
+Public/
+Sites/
+Library/
+Google Drive/
+pCloud Drive/
+
+# Development directories
+node_modules/
+venv/
+miniconda3/
+miniforge3_x86_64/
+ray_results/
+
+# Project directories that shouldn't be in this repo
+Empress/
+Energy-Nemo-MVP/
+Focus-Creation/
+Food_Analysis/
+Git/
+Glitch2_Presets/
+Hello_Quantum_World/
+Holy_2.png
+Hunyuan_Auto/
+Imposs_Physics/
+Kether-Scale/
+LLMCLONE1/
+LLM_Kaos/
+Library_Builder/
+LinkedInAutomaton/
+LondonDayPlanner-1/
+MDesigns-1/
+MDesigns/
+Midjourney-Clone/
+MoodMaster2/
+N8n-test/
+NACHASH-1.sfd
+NOUS/
+Nemo-One/
+Nemo_Time/
+New_One/
+Orange-ID-Template/
+Ourea/
+Photographer portfolio_aID_CC and CS6.png
+Photographer portfolio_aID_CC and CS62.png
+Pixel_Perfect/
+Plan-Boston/
+Plan-Quantum/
+Plan-ReCreation/
+Plan-Swift-Native/
+Plan-oAI/
+Plan_Working/
+Plugin/
+Poli-oli/
+Portfolio/
+Project_One/
+Projects/
+Quantum_Visualizations/
+ReachOut_Tool/
+Sigil-Man/
+Splice/
+TwitterSource.ipynb
+TwitterSourceLabel.py
+UNREAL-META/
+UnrealEngine/
+Unreal_Union_Pay.zip
+Unreal_Union_Pay/
+Untitled.ipynb
+Untitled1.ipynb
+VC-Deal-Flow/
+VirtualBox VMs/
+VoxEdit/
+Watch_Dis/
+Zero-Shot-Plan/
+apnew.mp4
+bookshelf_Large.fbx
+bookshelf_small.fbx
+dyad-apps/
+dyad/
+evaluation_workspace/
+flagship-reimagined-nexus/
+frontend/
+godot/
+habibi-honeycomb-canvas-1/
+hjuiu.fuse
+kether/
+my_cron_tasks.ini
+package-lock.json
+package.json
+savanna-web-explorer/
+selectcomp.txt
+stellar-portal-nexus/
+substrate-contracts-node/
+tech-portfolio-motion/
+templates/
+tests/
+toy-photo-clone-page/
+ual_scraped_data.csv
+ual_scraped_data.json
+ual_scraper/
+untitled.blend
+we---AR - CRVPP_Build.real
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp

@@ -1,0 +1,32 @@
+[
+  {
+    "name": "timestamp",
+    "type": "TIMESTAMP",
+    "mode": "REQUIRED",
+    "description": "Timestamp of the event"
+  },
+  {
+    "name": "location",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Location of the car"
+  },
+  {
+    "name": "action",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Action performed by the car"
+  },
+  {
+    "name": "next_poi",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Next point of interest"
+  },
+  {
+    "name": "accuracy",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": "Accuracy of the action"
+  }
+]
