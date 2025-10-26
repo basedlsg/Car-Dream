@@ -1,0 +1,11 @@
+fastapi>=0.100.0
+uvicorn>=0.23.0
+pydantic>=2.0.0
+google-cloud-storage>=2.10.0
+google-cloud-pubsub>=2.18.0
+google-cloud-run>=0.10.0
+google-cloud-compute>=1.14.0
+requests>=2.31.0
+asyncio-mqtt>=0.13.0
+sqlalchemy>=2.0.0
+alembic>=1.12.0
