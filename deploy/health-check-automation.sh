@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Health Check Automation Script
 # Comprehensive health monitoring and validation for all system components

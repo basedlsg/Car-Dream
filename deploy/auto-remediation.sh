@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Autonomous Remediation for Cars with a Life
 # - Detects and fixes common deployment drifts automatically

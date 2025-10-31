@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Deployment Validation and Rollback Script
 # Validates deployments and provides rollback mechanisms
