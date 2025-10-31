@@ -1,0 +1,50 @@
+steps:
+  # Build orchestrator
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-f', 'Dockerfile.orchestrator', '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/cars-with-a-life-repo/orchestrator:$COMMIT_SHA', '.']
+  
+  # Push orchestrator
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/cars-with-a-life-repo/orchestrator:$COMMIT_SHA']
+  
+  # Deploy orchestrator
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'orchestrator'
+      - '--image=us-central1-docker.pkg.dev/$PROJECT_ID/cars-with-a-life-repo/orchestrator:$COMMIT_SHA'
+      - '--region=us-central1'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+      - '--port=8080'
+      - '--set-env-vars=PROJECT_ID=$PROJECT_ID,REGION=us-central1'
+  
+  # Build reporter
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-f', 'Dockerfile.reporter', '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/cars-with-a-life-repo/reporter:$COMMIT_SHA', '.']
+  
+  # Push reporter
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/cars-with-a-life-repo/reporter:$COMMIT_SHA']
+  
+  # Deploy reporter
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'reporter'
+      - '--image=us-central1-docker.pkg.dev/$PROJECT_ID/cars-with-a-life-repo/reporter:$COMMIT_SHA'
+      - '--region=us-central1'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+      - '--port=8080'
+      - '--set-env-vars=PROJECT_ID=$PROJECT_ID,DATASET_ID=car_dream_experiments,BUCKET_NAME=$PROJECT_ID-results'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+
+

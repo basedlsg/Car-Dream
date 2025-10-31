@@ -1,9 +1,9 @@
-# Root-level Python dependencies for development and shared utilities
+fastapi>=0.100.0
+uvicorn>=0.23.0
 pydantic>=2.0.0
+google-cloud-bigquery>=3.11.0
 google-cloud-storage>=2.10.0
 google-cloud-pubsub>=2.18.0
-google-cloud-compute>=1.14.0
-google-cloud-aiplatform>=1.35.0
-pytest>=7.4.0
-black>=23.0.0
-flake8>=6.0.0
+google-cloud-exceptions>=0.4.0
+asyncio>=3.4.3
+python-multipart>=0.0.6
