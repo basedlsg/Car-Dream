@@ -34,14 +34,20 @@ RUN apt-get update && apt-get install -y \
 # Create CARLA directory
 RUN mkdir -p ${CARLA_ROOT}
 
-# Download and install CARLA simulator (with retry, timeout, and redirect handling)
+# Download and install CARLA simulator (using curl with automatic redirect following)
+# CARLA will be downloaded at runtime if not present during build
 RUN cd /tmp && \
-    wget --timeout=300 --tries=3 --retry-connrefused --max-redirect=5 --no-check-certificate \
-        -O CARLA_${CARLA_VERSION}.tar.gz \
-        "https://carla-releases.s3.eu-west-3.amazonaws.com/Linux/CARLA_${CARLA_VERSION}.tar.gz" && \
-    tar -xzf CARLA_${CARLA_VERSION}.tar.gz -C ${CARLA_ROOT} --strip-components=1 && \
-    rm CARLA_${CARLA_VERSION}.tar.gz && \
-    echo "CARLA download completed successfully"
+    if curl -L --max-time 600 --retry 3 --retry-delay 10 --location-trusted \
+        -o CARLA_${CARLA_VERSION}.tar.gz \
+        "https://carla-releases.s3.eu-west-3.amazonaws.com/Linux/CARLA_${CARLA_VERSION}.tar.gz" 2>/dev/null; then \
+        echo "CARLA download successful, extracting..."; \
+        tar -xzf CARLA_${CARLA_VERSION}.tar.gz -C ${CARLA_ROOT} --strip-components=1 && \
+        rm CARLA_${CARLA_VERSION}.tar.gz && \
+        echo "CARLA installation completed"; \
+    else \
+        echo "Warning: CARLA download failed during build. Will attempt runtime download."; \
+        echo "CARLA will be downloaded automatically when the container starts if not present."; \
+    fi
 
 # Create directories for datasets
 RUN mkdir -p ${CARLA_ROOT}/Import \
