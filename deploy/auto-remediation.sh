@@ -111,19 +111,32 @@ ensure_bucket(){
 }
 
 ensure_bigquery_dataset(){
-  if ! bq --project_id="$PROJECT_ID" ls | awk '{print $1}' | grep -qx "$BQ_DATASET"; then
+  # Check if dataset exists using gcloud API instead of bq CLI
+  local exists
+  exists=$(gcloud alpha bq datasets list --project="$PROJECT_ID" --format="value(datasetId)" 2>/dev/null | grep -x "$BQ_DATASET" || echo "")
+  
+  if [[ -z "$exists" ]]; then
     log_step "Creating BigQuery dataset $BQ_DATASET"
-    # Use retries to mitigate transient timeouts
+    # Use gcloud bq command with retries
     local attempts=0
-    local max_attempts=5
-    until bq --project_id="$PROJECT_ID" mk "$BQ_DATASET" >/dev/null 2>&1; do
-      attempts=$((attempts+1))
-      if (( attempts >= max_attempts )); then
-        log_warn "Dataset creation timed out after $attempts attempts. Continuing."
-        break
+    local max_attempts=3
+    while [[ $attempts -lt $max_attempts ]]; do
+      if gcloud alpha bq datasets create "$BQ_DATASET" \
+        --location="$REGION" \
+        --project="$PROJECT_ID" \
+        --description="Cars with a Life autonomous driving experiment data" >/dev/null 2>&1; then
+        log_info "✓ Created BigQuery dataset $BQ_DATASET"
+        return 0
       fi
-      sleep 5
+      attempts=$((attempts+1))
+      if [[ $attempts -lt $max_attempts ]]; then
+        log_warn "Attempt $attempts/$max_attempts failed, retrying..."
+        sleep $((attempts * 2))
+      fi
     done
+    log_warn "Dataset creation failed after $max_attempts attempts. May require manual creation via Console."
+  else
+    log_info "✓ BigQuery dataset $BQ_DATASET exists"
   fi
 }
 

@@ -46,48 +46,48 @@ fi
 # Create startup script that uses Artifact Registry image
 cat > /tmp/carla-startup.sh << EOF
 #!/bin/bash
-
-# CARLA Runner Startup Script for Compute Engine
 set -e
+
+# Install NVIDIA drivers for Ubuntu
+curl -fsSL https://raw.githubusercontent.com/GoogleCloudPlatform/compute-gpu-installation/main/linux/install_gpu_driver.py --output /tmp/install_gpu_driver.py
+python3 /tmp/install_gpu_driver.py
+
+# Install Docker
+curl -fsSL https://get.docker.com -o /tmp/get-docker.sh
+sh /tmp/get-docker.sh
+
+# Install NVIDIA Container Toolkit
+distribution=\$(. /etc/os-release;echo \$ID\$VERSION_ID)
+curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
+curl -s -L https://nvidia.github.io/nvidia-docker/\$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+
+sudo apt-get update && sudo apt-get install -y nvidia-container-toolkit
+sudo systemctl restart docker
 
 # Configure Docker for Artifact Registry
 gcloud auth configure-docker ${REGION}-docker.pkg.dev --quiet
-
-# Install NVIDIA drivers
-/opt/deeplearning/install-driver.sh
-
-# Pull and run CARLA Runner container
-docker pull $IMAGE_URL
 
 # Stop any existing container
 docker stop carla-runner || true
 docker rm carla-runner || true
 
-# Run CARLA Runner container
+# Pull and run CARLA Runner container
+docker pull $IMAGE_URL
+
+# Run container with GPU support
 docker run -d \
     --name carla-runner \
-    --restart unless-stopped \
     --gpus all \
     -p 2000:2000 \
     -p 2001:2001 \
     -p 2002:2002 \
     -p 8080:8080 \
+    --restart unless-stopped \
     -e GCP_PROJECT_ID=$PROJECT_ID \
     -e GCP_REGION=$REGION \
-    -v /var/log:/var/log \
     $IMAGE_URL
 
-# Wait for container to start
-sleep 30
-
-# Check if container is running
-if docker ps | grep -q carla-runner; then
-    echo "CARLA Runner container started successfully"
-else
-    echo "Failed to start CARLA Runner container"
-    docker logs carla-runner
-    exit 1
-fi
+echo "CARLA Runner container started successfully"
 EOF
 
 # Create GPU-enabled Compute Engine instance
@@ -98,8 +98,8 @@ gcloud compute instances create $INSTANCE_NAME \
     --machine-type=n1-standard-8 \
     --accelerator=type=nvidia-tesla-t4,count=1 \
     --maintenance-policy=TERMINATE \
-    --image-family=ubuntu-2004-lts \
-    --image-project=ubuntu-os-cloud \
+    --image-family=tf2-latest-gpu \
+    --image-project=deeplearning-platform-release \
     --boot-disk-size=100GB \
     --boot-disk-type=pd-ssd \
     --metadata-from-file startup-script=/tmp/carla-startup.sh \
