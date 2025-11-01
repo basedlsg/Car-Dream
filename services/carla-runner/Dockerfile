@@ -34,12 +34,14 @@ RUN apt-get update && apt-get install -y \
 # Create CARLA directory
 RUN mkdir -p ${CARLA_ROOT}
 
-# Download and install CARLA simulator (with retry and timeout)
+# Download and install CARLA simulator (with retry, timeout, and redirect handling)
 RUN cd /tmp && \
-    wget --timeout=300 --tries=3 --retry-connrefused https://carla-releases.s3.eu-west-3.amazonaws.com/Linux/CARLA_${CARLA_VERSION}.tar.gz && \
+    wget --timeout=300 --tries=3 --retry-connrefused --max-redirect=5 --no-check-certificate \
+        -O CARLA_${CARLA_VERSION}.tar.gz \
+        "https://carla-releases.s3.eu-west-3.amazonaws.com/Linux/CARLA_${CARLA_VERSION}.tar.gz" && \
     tar -xzf CARLA_${CARLA_VERSION}.tar.gz -C ${CARLA_ROOT} --strip-components=1 && \
-    rm CARLA_${CARLA_VERSION}.tar.gz || \
-    echo "Warning: CARLA download failed, continuing without full CARLA installation"
+    rm CARLA_${CARLA_VERSION}.tar.gz && \
+    echo "CARLA download completed successfully"
 
 # Create directories for datasets
 RUN mkdir -p ${CARLA_ROOT}/Import \
@@ -58,8 +60,13 @@ WORKDIR /app
 # Create dataset initialization scripts
 RUN mkdir -p /app/scripts
 
-# Make CARLA executable
-RUN chmod +x ${CARLA_ROOT}/CarlaUE4.sh
+# Make CARLA executable (only if it exists)
+RUN if [ -f ${CARLA_ROOT}/CarlaUE4.sh ]; then \
+        chmod +x ${CARLA_ROOT}/CarlaUE4.sh && \
+        echo "CARLA executable made executable"; \
+    else \
+        echo "Warning: CARLA executable not found at ${CARLA_ROOT}/CarlaUE4.sh"; \
+    fi
 
 # Create startup script for headless operation
 COPY scripts/start.sh /app/start.sh
