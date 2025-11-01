@@ -98,8 +98,8 @@ gcloud compute instances create $INSTANCE_NAME \
     --machine-type=n1-standard-8 \
     --accelerator=type=nvidia-tesla-t4,count=1 \
     --maintenance-policy=TERMINATE \
-    --image-family=cos-gpu \
-    --image-project=cos-cloud \
+    --image-family=ubuntu-2004-lts \
+    --image-project=ubuntu-os-cloud \
     --boot-disk-size=100GB \
     --boot-disk-type=pd-ssd \
     --metadata-from-file startup-script=/tmp/carla-startup.sh \
@@ -120,7 +120,16 @@ gcloud compute firewall-rules create allow-carla-ports \
 
 # Wait for instance to be ready
 echo_info "Waiting for instance to be ready..."
-gcloud compute instances wait-until-running $INSTANCE_NAME --zone=$ZONE
+sleep 10
+for i in {1..30}; do
+    STATUS=$(gcloud compute instances describe $INSTANCE_NAME --zone=$ZONE --format="value(status)" 2>/dev/null || echo "")
+    if [ "$STATUS" = "RUNNING" ]; then
+        echo_info "Instance is running"
+        break
+    fi
+    echo_info "Waiting for instance... ($i/30)"
+    sleep 5
+done
 
 # Get instance IP for validation
 INSTANCE_IP=$(gcloud compute instances describe $INSTANCE_NAME \
