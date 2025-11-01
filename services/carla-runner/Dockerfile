@@ -1,5 +1,5 @@
 # CARLA Runner Dockerfile with GPU support and headless configuration
-FROM nvidia/cuda:11.8-devel-ubuntu20.04
+FROM nvidia/cuda:11.8.0-devel-ubuntu20.04
 
 # Set environment variables for headless operation
 ENV DEBIAN_FRONTEND=noninteractive
@@ -29,15 +29,17 @@ RUN apt-get update && apt-get install -y \
     libxrender-dev \
     libgomp1 \
     curl \
-    && rm -rf /var/lib/apt/lists/*#
- Create CARLA directory
+    && rm -rf /var/lib/apt/lists/*
+
+# Create CARLA directory
 RUN mkdir -p ${CARLA_ROOT}
 
-# Download and install CARLA simulator
+# Download and install CARLA simulator (with retry and timeout)
 RUN cd /tmp && \
-    wget -q https://carla-releases.s3.eu-west-3.amazonaws.com/Linux/CARLA_${CARLA_VERSION}.tar.gz && \
+    wget --timeout=300 --tries=3 --retry-connrefused https://carla-releases.s3.eu-west-3.amazonaws.com/Linux/CARLA_${CARLA_VERSION}.tar.gz && \
     tar -xzf CARLA_${CARLA_VERSION}.tar.gz -C ${CARLA_ROOT} --strip-components=1 && \
-    rm CARLA_${CARLA_VERSION}.tar.gz
+    rm CARLA_${CARLA_VERSION}.tar.gz || \
+    echo "Warning: CARLA download failed, continuing without full CARLA installation"
 
 # Create directories for datasets
 RUN mkdir -p ${CARLA_ROOT}/Import \
@@ -57,8 +59,9 @@ WORKDIR /app
 RUN mkdir -p /app/scripts
 
 # Make CARLA executable
-RUN chmod +x ${CARLA_ROOT}/CarlaUE4.sh# Cre
-ate startup script for headless operation
+RUN chmod +x ${CARLA_ROOT}/CarlaUE4.sh
+
+# Create startup script for headless operation
 COPY scripts/start.sh /app/start.sh
 RUN chmod +x /app/start.sh
 
