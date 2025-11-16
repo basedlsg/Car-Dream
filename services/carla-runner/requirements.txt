@@ -1,4 +1,5 @@
-carla==0.9.15
+# CARLA Python API comes from the downloaded CARLA tar file, not PyPI
+# The egg file is added to PYTHONPATH in Dockerfile
 numpy>=1.21.0
 opencv-python>=4.5.0
 Pillow>=8.3.0

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Deployment Validation and Rollback Script
 # Validates deployments and provides rollback mechanisms
@@ -219,21 +219,29 @@ validate_pubsub() {
     return 0
 }
 
-# Validate storage buckets
+# Validate storage buckets (use gcloud storage to avoid gsutil flakiness)
 validate_storage() {
     echo_validate "Validating Cloud Storage buckets..."
-    
+
     local buckets=("${PROJECT_ID}-carla-data" "${PROJECT_ID}-models" "${PROJECT_ID}-results")
-    
+
+    # Fetch bucket names once via control-plane API
+    local existing
+    existing=$(gcloud storage buckets list --project="$PROJECT_ID" --format="value(name)" 2>/dev/null || echo "")
+
+    local missing=0
     for bucket in "${buckets[@]}"; do
-        if gsutil ls -b gs://$bucket &> /dev/null; then
+        if echo "$existing" | grep -qx "$bucket"; then
             echo_info "✓ Bucket gs://$bucket exists"
         else
             echo_error "✗ Bucket gs://$bucket not found"
-            return 1
+            missing=$((missing+1))
         fi
     done
-    
+
+    if [[ $missing -gt 0 ]]; then
+        return 1
+    fi
     return 0
 }
 

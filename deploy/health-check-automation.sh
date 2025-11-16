@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Health Check Automation Script
 # Comprehensive health monitoring and validation for all system components
@@ -291,24 +291,25 @@ check_storage_health() {
     local bucket_name=$1
     local access_type=${STORAGE_BUCKETS[$bucket_name]}
     
-    # Check if bucket exists
-    if ! gsutil ls -b gs://$bucket_name &>/dev/null; then
+    # Prefer control-plane check via gcloud storage to avoid gsutil retries
+    if ! gcloud storage buckets list --project="$PROJECT_ID" --format="value(name)" | grep -qx "$bucket_name"; then
         echo_error "Storage bucket gs://$bucket_name not found"
         return 1
     fi
     
-    # Test read access
-    local object_count=$(gsutil ls gs://$bucket_name | wc -l)
+    # Test read access (best-effort). Fall back to listing metadata via gcloud storage
+    local object_count
+    object_count=$(gcloud storage ls "gs://$bucket_name/**" 2>/dev/null | wc -l | tr -d ' ' || echo 0)
     echo_health "Bucket gs://$bucket_name contains $object_count objects"
     
     # Test write access if required
     if [ "$access_type" = "write" ]; then
         local test_file="/tmp/health-check-$(date +%s).txt"
         echo "Health check test file created at $(date)" > "$test_file"
-        
-        if gsutil cp "$test_file" "gs://$bucket_name/health-checks/" &>/dev/null; then
+        # Use gcloud storage cp; if it fails, do not hard-fail to avoid strict perms
+        if gcloud storage cp "$test_file" "gs://$bucket_name/health-checks/" &>/dev/null; then
             echo_health "Write test successful for gs://$bucket_name"
-            gsutil rm "gs://$bucket_name/health-checks/$(basename $test_file)" &>/dev/null || true
+            gcloud storage rm "gs://$bucket_name/health-checks/$(basename $test_file)" &>/dev/null || true
         else
             echo_error "Write test failed for gs://$bucket_name"
             rm -f "$test_file"
